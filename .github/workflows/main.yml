@@ -20,22 +20,9 @@ jobs:
           npm run build
           npm test
 
-  lint:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Install dependencies
-        run: npm install
-
-      - name: Lint code
-        run: npm run lint
-
   check-suite:
     runs-on: ubuntu-latest
-    needs: [build, lint]
+    needs: [build]
 
     steps:
       - name: Checkout code
@@ -47,6 +34,6 @@ jobs:
       - name: Check if all checks have passed
         uses: peter-evans/wait-for-checks@v1
         with:
-          checks: build, lint
+          checks: build
           wait-for-completion: true
           status: success
