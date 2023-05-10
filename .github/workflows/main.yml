@@ -1,28 +1,52 @@
 name: CI
 
 on:
-  push:
-    branches: [ main ]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: Use Node.js
-      uses: actions/setup-node@v2.1.5
-      with:
-        node-version: '14.x'
+      - name: Install dependencies
+        run: npm install
 
-    - name: Install dependencies
-      run: npm install
+      - name: Build and test code
+        run: |
+          npm run build
+          npm test
 
-    - name: Build
-      run: npm run build
+  lint:
+    runs-on: ubuntu-latest
 
-    - name: Test
-      run: npm test
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Lint code
+        run: npm run lint
+
+  check-suite:
+    runs-on: ubuntu-latest
+    needs: [build, lint]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Check if all checks have passed
+        uses: peter-evans/wait-for-checks@v1
+        with:
+          checks: build, lint
+          wait-for-completion: true
+          status: success
